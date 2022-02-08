@@ -33,6 +33,16 @@ be manually set for the motor before starting. Autotune functions usually return
 values but in most cases you will still need to manually adjust them for optimum performance.
 
 ## Usage
+
+TODO: Discuss how to clone this into your workspace
+
+Simple launch:
+ros2 launch roboclaw_ros roboclaw.launch.py
+
+Launch with debug logging:
+ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
+
+## Usage (OLD)
 Just clone the repo into your catkin workspace. It contains the ROS package and the motor controller driver.  Remmeber to make sure ROS has permisions to use the dev port you give it.
 ```bash
 cd <workspace>/src
@@ -41,6 +51,9 @@ cd <workspace>
 catkin_make
 source devel/setup.bash
 roslaunch roboclaw_node roboclaw.launch
+
+
+
 ```
 
 ## Parameters
