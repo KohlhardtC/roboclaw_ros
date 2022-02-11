@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
-<package>
-  <name>roboclaw_node</name>
+<package format="3">
+  <name>roboclaw_ros</name>
   <version>0.0.1</version>
-  <description>Node for roboclaw</description>
+  <description>ROS2 Node for roboclaw</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="bwbazemore@uga.edu">Brad Bazemore</maintainer>
+  <maintainer email="chrisk+github@vidog.com">Chris Kohlhardt</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -25,9 +25,7 @@
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
   <!-- Authors do not have to be maintianers, but could be -->
   <!-- Example: -->
-  <author email="bwbazemore@uga.edu">Brad Bazemore</author>
-
-
+  <author email="chrisk+github@vidog.com">Chris Kohlhardt</author>
   <!-- The *_depend tags are used to specify dependencies -->
   <!-- Dependencies can be catkin packages or system dependencies -->
   <!-- Examples: -->
@@ -39,7 +37,9 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
-  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- This was in the ros1 version -->
+  <!-- buildtool_depend>catkin</buildtool_depend 
   <build_depend>geometry_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>rospy</build_depend>
@@ -49,12 +49,15 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
-  <run_depend>tf</run_depend>
+  <run_depend>tf</run_depend -->
+
+  <exec_depend>rclpy</exec_depend> 
+
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <build_type>ament_python</build_type>
   </export>
 </package>
