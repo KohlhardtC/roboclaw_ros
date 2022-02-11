@@ -1,38 +1,28 @@
 # roboclaw_ros
-[![Build Status](https://travis-ci.org/sonyccd/roboclaw_ros.svg?branch=master)](https://travis-ci.org/sonyccd/roboclaw_ros)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6f65acd1242e4a0582ecb04c7cc70f68)](https://www.codacy.com/app/snakes-in-the-box/roboclaw_ros?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sonyccd/roboclaw_ros&amp;utm_campaign=Badge_Grade)
+This is a ROS2 node for the Roboclaw motor controllers made by [Basicmicro Motion Control](https://www.basicmicro.com). This code is a fork of of the [ROS1 code](https://github.com/sonyccd/roboclaw_ros) created by Brad Bazemore.
 
-This is the ROS driver for the Roboclaw motor controllers made by [Ion Motion Control](http://www.ionmc.com/).
-
-#HELP: I have been busy with another project that is not using robo claw. Message me if you want to become a contributer and help keep this thing alive!
+This work has been llightly tested and known to work with at least a recent Roboclaw 2x7A Motor Controller. 
 
 ## Before you begin
-Before you use this package you need to calibrate the velocity PID on the Roboclaw.  This will requare the
-installation of the free software [IonMotion](http://downloads.ionmc.com/software/IonMotion/ionmotion.htm) (Windows only).
+Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
+installation of the free software [BasicMicro Motion Studio](https://downloads.basicmicro.com/software/BMStudio/setup.exe) (Windows only, make sure you are using the newer BasicMicro version and not the older Ion Motion Studio -- I've seen both downloadable on their website).
+
 You do not need to tune for position just velocity.
 
-From the user [manual](http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf):
->IonMotion includes the option to autotune velocity and or position values. To use these options
-you should first make sure your encoder and motor are running in the correct direction and that
-basic PWM control of the motor works as expected. To do this go to the PWM Settings screen in
-IonMotion. Slide the motor slider up to start moving the motor forward. Check the encoder is
-increasing in value. If it is not either reverse the motor wires or the encoder wires.  
+Follow [this guide](https://resources.basicmicro.com/auto-tuning-with-motion-studio/) to learn how to tune the controller.  
 
->If you are using autotune for Position control you must first set the motors QPPS value. Unlike
-Velocity autotune the QPPS value will not be automatically measured. This is because most
-position control systems have a limited range of movement. Once you have manually set the
-motors QPPS value(eg the maximum speed the motor can run at) you can continue with Position
-autotuning.  
-
->Then just click the autotune button for the motor you want to tune. The autotune function will
-try to determine the best settings for the motor. In the Velocity settings window it will autotune
-for velocity. In the Position Settings window you have the option to tune a simple PD position
-controller, a PID position controller or a cascaded Position/Velocity controller(PIV). The cascaded
-tune will determine both the velocity and position values for the motor but still requires the QPPS
-be manually set for the motor before starting. Autotune functions usually return reasonable
-values but in most cases you will still need to manually adjust them for optimum performance.
 
 ## Usage
+
+TODO: Discuss how to clone this into your workspace
+
+Simple launch:
+ros2 launch roboclaw_ros roboclaw.launch.py
+
+Launch with debug logging:
+ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
+
+## Usage (OLD)
 Just clone the repo into your catkin workspace. It contains the ROS package and the motor controller driver.  Remmeber to make sure ROS has permisions to use the dev port you give it.
 ```bash
 cd <workspace>/src
@@ -41,6 +31,9 @@ cd <workspace>
 catkin_make
 source devel/setup.bash
 roslaunch roboclaw_node roboclaw.launch
+
+
+
 ```
 
 ## Parameters
