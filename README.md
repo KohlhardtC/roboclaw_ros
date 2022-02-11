@@ -1,7 +1,7 @@
 # roboclaw_ros
 This is a ROS2 node for the Roboclaw motor controllers made by [Basicmicro Motion Control](https://www.basicmicro.com). This code is a fork of of the [ROS1 code](https://github.com/sonyccd/roboclaw_ros) created by Brad Bazemore.
 
-This work has been llightly tested and known to work with at least a recent Roboclaw 2x7A Motor Controller. 
+This work has been llightly tested and known to work with ROS2 Foxy and a recent Roboclaw 2x7A Motor Controller. 
 
 ## Before you begin
 Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
@@ -14,27 +14,33 @@ Follow [this guide](https://resources.basicmicro.com/auto-tuning-with-motion-stu
 
 ## Usage
 
-TODO: Discuss how to clone this into your workspace
+Clone the repo into your workspace. It contains the ROS2 package and the motor controller driver. Remmeber to make sure ROS has permisions to use the dev port you give it. If you are having trouble, you might find it helpful to first test out you can use the motor driver with thesse [python examples(https://downloads.basicmicro.com/code/roboclaw_python.zip).
 
-Simple launch:
-ros2 launch roboclaw_ros roboclaw.launch.py
+### Clone and Build
 
-Launch with debug logging:
-ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
+- cd \<workspace\>/src
+- clone
+  - **ssh:** git clone git@github.com:KohlhardtC/roboclaw_ros.git 
+  - **https:** git clone https://github.com/KohlhardtC/roboclaw_ros.git
+- cd \<workspace\>
+- source
+  - **typical Linux setup:** source /opt/ros/foxy/setup.bash
+- colcon build --symlink-install
 
-## Usage (OLD)
-Just clone the repo into your catkin workspace. It contains the ROS package and the motor controller driver.  Remmeber to make sure ROS has permisions to use the dev port you give it.
-```bash
-cd <workspace>/src
-git clone https://github.com/sonyccd/roboclaw_ros.git
-cd <workspace>
-catkin_make
-source devel/setup.bash
-roslaunch roboclaw_node roboclaw.launch
+### Run
 
+Make sure RoboClaw has power and run the following in a new terminal window:
 
+- cd \<workspace\>/src
+- source . install/setup.bash
+- ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
+  
+### Test with teleop_twist_keyboard
 
-```
+- source
+  - **typical Linux setup:** source /opt/ros/foxy/setup.bash
+- ros2 run teleop_twist_keyboard teleop_twist_keyboard 
+
 
 ## Parameters
 The launch file can be configure at the command line with arguments, by changing the value in the launch file or through the rosparam server.
