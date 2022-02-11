@@ -1,5 +1,5 @@
 # roboclaw_ros
-This is a ROS2 node for the Roboclaw motor controllers made by [Basicmicro Motion Control](https://www.basicmicro.com). This code is a fork of of the [ROS1 code](https://github.com/sonyccd/roboclaw_ros) created by Brad Bazemore.
+This is a **ROS2** node for the Roboclaw motor controllers made by [Basicmicro Motion Control](https://www.basicmicro.com). This code is a fork of of the [ROS1 code](https://github.com/sonyccd/roboclaw_ros) created by Brad Bazemore.
 
 This work has been llightly tested and known to work with ROS2 Foxy and a recent Roboclaw 2x7A Motor Controller. 
 
