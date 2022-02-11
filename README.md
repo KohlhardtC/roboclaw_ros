@@ -4,6 +4,8 @@ This is a ROS2 node for the Roboclaw motor controllers made by [Basicmicro Motio
 This work has been llightly tested and known to work with ROS2 Foxy and a recent Roboclaw 2x7A Motor Controller. 
 
 ## Before you begin
+
+### Tune the RoboClaw
 Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
 installation of the free software [BasicMicro Motion Studio](https://downloads.basicmicro.com/software/BMStudio/setup.exe) (Windows only, make sure you are using the newer BasicMicro version and not the older Ion Motion Studio -- I've seen both downloadable on their website).
 
@@ -11,7 +13,13 @@ You do not need to tune for position just velocity.
 
 Follow [this guide](https://resources.basicmicro.com/auto-tuning-with-motion-studio/) to learn how to tune the controller.  
 
-Also make sure at this time that you have the baud and address set to the same values you plan to use as shown in the parameters below. 
+### Set the baud and address in Motion Studio
+
+Make sure at this time that you have the baud and address set to the same values you plan to use as shown in the parameters below. 
+
+### Set device
+
+The device in the launch file provided is set to the default of /dev/ttyACM0. If you have your RoboClaw on a different device, be sure to set that!
 
 ## Usage
 
@@ -34,8 +42,11 @@ Make sure RoboClaw has power and run the following in a new terminal window:
 
 - cd \<workspace\>/src
 - source . install/setup.bash
-- ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
-  
+- run 
+  - **typical:** ros2 launch roboclaw_ros roboclaw.launch.py 
+  - **debugging:** ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug
+  - **debugging and using a different device:** ros2 launch roboclaw_ros roboclaw.launch.py log_level:=debug device:=/dev/ttyUSB0
+
 ### Test with teleop_twist_keyboard
 
 - source
@@ -63,5 +74,5 @@ Velocity commands for the mobile base.
 /odom [(nav_msgs/Odometry)](http://docs.ros.org/api/nav_msgs/html/msg/Odometry.html)  
 Odometry output from the mobile base.
 
-#IF SOMETHING IS BROEKN:
+# IF SOMETHING IS BROEKN:
 Please file an issue, it makes it far easier to keep track of what needs to be fixed. It also allows others that might have solved the problem to contribute.  If you are confused feel free to email me, I might have overlooked something in my readme.
