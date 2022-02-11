@@ -11,6 +11,7 @@ You do not need to tune for position just velocity.
 
 Follow [this guide](https://resources.basicmicro.com/auto-tuning-with-motion-studio/) to learn how to tune the controller.  
 
+Also make sure at this time that you have the baud and address set to the same values you plan to use as shown in the parameters below. 
 
 ## Usage
 
