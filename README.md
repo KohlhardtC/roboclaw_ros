@@ -47,7 +47,7 @@ Make sure RoboClaw has power and run the following in a new terminal window:
 The launch file can be configure at the command line with arguments, by changing the value in the launch file or through the rosparam server.
 
 |Parameter|Definition|
-|-----|----------|-------|
+|-----|-------|
 |dev|Dev that is the Roboclaw|
 |baud|Baud rate the Roboclaw is configured for|
 |address|The address the Roboclaw is set to, 128 is 0x80|
