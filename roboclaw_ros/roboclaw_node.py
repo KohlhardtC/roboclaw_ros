@@ -4,29 +4,20 @@ from math import pi, cos, sin
 import diagnostic_msgs
 import diagnostic_updater 
 
-#import rospy
 import rclpy
 from rclpy.node import Node
 
-#import tf
 import tf2_ros
 
 from geometry_msgs.msg import Quaternion, Twist
 from nav_msgs.msg import Odometry
 
-#import roboclaw_driver as roboclaw
-#from .driver import roboclaw_driver as roboclaw
-from .driver import roboclaw_3 as roboclaw
-#from .driver import roboclaw_3 
-
+from .driver import roboclaw_3 as roboclaw 
 
 __author__ = "chrisk+github@vidog.com (Chris Kohlhardt)"
-
 # This code forked from https://github.com/sonyccd/roboclaw_ros
-# and adapted to work with Ros2
-__author__ = "bwbazemore@uga.edu (Brad Bazemore)"
-
-
+# and adapted to work with Ros2 
+#__author__ = "bwbazemore@uga.edu (Brad Bazemore)"
 
 # TODO need to find some better was of handling OSerror 11 or preventing it, any ideas?
 
@@ -36,9 +27,8 @@ class EncoderOdom:
         node = rclpy.create_node('encoder_odom') 
 
         self.TICKS_PER_METER = ticks_per_meter
-        self.BASE_WIDTH = base_width
-        #self.odom_pub = rospy.Publisher('/odom', Odometry, queue_size=10)
-        self.odom_pub = node.create_publisher(Odometry,'/odom', 10)
+        self.BASE_WIDTH = base_width 
+        self.odom_pub = node.create_publisher(Odometry,node.declare_parameter('~topic_odom_out', '/odom' ).value , 10)
         self.cur_x = 0
         self.cur_y = 0
         self.cur_theta = 0.0
@@ -158,45 +148,28 @@ class RoboClawNode(Node):
                        0x4000: (diagnostic_msgs.msg.DiagnosticStatus.OK, "M1 home"),
                        0x8000: (diagnostic_msgs.msg.DiagnosticStatus.OK, "M2 home")}
 
-        #rospy.init_node("roboclaw_node")
-        #rospy.on_shutdown(self.shutdown)
-        #rospy.loginfo("Connecting to roboclaw")
+    
         super().__init__('roboclaw_node')
         #TODO! Missing onshutdown, do I need that?
         self.get_logger().info("Connecting to roboclaw")     
 
-        #dev_name = rospy.get_param("~dev", "/dev/ttyACM0")
-        #baud_rate = int(rospy.get_param("~baud", "115200"))
         dev_name = self.declare_parameter('~dev', '/dev/ttyACM0' ).value
-        baud_rate = int(self.declare_parameter('~baud', '115200').value)
-        
-         
-
-        #self.address = int(rospy.get_param("~address", "128"))
-        #self.address = hex( self.declare_parameter('~address', '128' ) )
-        self.address = int(self.declare_parameter('~address', '128' ).value )
-       
-        
+        baud_rate = int(self.declare_parameter('~baud', '115200').value) 
+        self.address = int(self.declare_parameter('~address', '128' ).value ) 
 
         self.get_logger().debug("  looking for roboclaw at " + dev_name ) 
         self.get_logger().debug("  baud set to " + str(baud_rate) ) 
         self.get_logger().debug("  address set to " + str(self.address) ) 
         
-
-        #if self.address > 0x87 or self.address < 0x80:
         if self.address > 135 or self.address < 128:
             rospy.logfatal("Address out of range")
             rospy.signal_shutdown("Address out of range")
 
         # TODO need someway to check if address is correct
-        try:
-            #roboclaw.Open(dev_name, baud_rate)
+        try: 
             self.rc = roboclaw.Roboclaw( dev_name, baud_rate )
             self.rc.Open()
         except Exception as e: 
-            #rospy.logfatal("Could not connect to Roboclaw")
-            #self.get_logger().debug(e)
-            #rospy.signal_shutdown("Could not connect to Roboclaw")
             self.get_logger().fatal('Could not connect to Roboclaw')
             self.get_logger().debug(e)
             self.destroy_node()
@@ -207,28 +180,21 @@ class RoboClawNode(Node):
         self.updater.add(diagnostic_updater.
                          FunctionDiagnosticTask("Vitals", self.check_vitals))
 
-        try:
-            #version = roboclaw.ReadVersion( self.address.to_bytes(2, 'big' ) )
-            #version = self.rc.ReadVersion( self.address.to_bytes(2, 'big' ) )
+        try: 
             version = self.rc.ReadVersion( self.address )
-        except Exception as e:
-            #rospy.logwarn("Problem getting roboclaw version")
+        except Exception as e: 
             self.get_logger().warn("Problem getting roboclaw version") 
             self.get_logger().debug(e) 
             pass
 
-        if not version[0]:
-            #rospy.logwarn("Could not get version from roboclaw")
+        if not version[0]: 
             self.get_logger().warn( "Could not get version from roboclaw")
-        else:
-            #self.get_logger().debug(repr(version[1]))
+        else: 
             self.get_logger().debug(repr(version[1])) 
 
         self.rc.SpeedM1M2(self.address, 0, 0)
-        self.rc.ResetEncoders(self.address)
+        self.rc.ResetEncoders(self.address) 
 
-        
-        #self.MAX_SPEED = float(rospy.get_param("~max_speed", "2.0"))
         self.MAX_SPEED = float( self.declare_parameter( "~max_speed", "2.0").value )
         self.TICKS_PER_METER = float( self.declare_parameter("~tick_per_meter", "4342.2").value )
         self.BASE_WIDTH = float( self.declare_parameter("~base_width", "0.315").value )
@@ -236,16 +202,10 @@ class RoboClawNode(Node):
         self.encodm = EncoderOdom(self.TICKS_PER_METER, self.BASE_WIDTH)
         self.last_set_speed_time = self.get_clock().now()
 
-        #rospy.Subscriber("cmd_vel", Twist, self.cmd_vel_callback)
         self.create_subscription( Twist, "/cmd_vel", self.cmd_vel_callback, 10 )
 
-        #rospy.sleep(1)
-        #rate = self.create_rate(1)
-
-        self.get_logger().info( "Before sleep")
-        # TODO Why is there sleep here? Do we even need this?
-        #rate.sleep() 
-        self.get_logger().info( "After sleep")
+        # TODO Why was there a sleep in here? Do we even need this?    
+        #rospy.sleep(1) 
 
         self.get_logger().debug("dev: " + dev_name)
         self.get_logger().debug("baud: " + str(baud_rate))
@@ -295,10 +255,8 @@ class RoboClawNode(Node):
                 self.updater.update()
             r_time.sleep()
 
-    def cmd_vel_callback(self, twist):
-        #self.last_set_speed_time = rospy.get_rostime()
-        self.last_set_speed_time = self.get_clock().now()
-
+    def cmd_vel_callback(self, twist): 
+        self.last_set_speed_time = self.get_clock().now() 
 
         linear_x = twist.linear.x
         if linear_x > self.MAX_SPEED:
