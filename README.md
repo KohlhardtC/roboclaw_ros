@@ -5,6 +5,11 @@ This work has been llightly tested and known to work with ROS2 Foxy and a recent
 
 ## Before you begin
 
+### Install Dependancies 
+
+sudo apt install ros-foxy-tf-transformations
+
+
 ### Tune the RoboClaw
 Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
 installation of the free software [BasicMicro Motion Studio](https://downloads.basicmicro.com/software/BMStudio/setup.exe) (Windows only, make sure you are using the newer BasicMicro version and not the older Ion Motion Studio -- I've seen both downloadable on their website).
