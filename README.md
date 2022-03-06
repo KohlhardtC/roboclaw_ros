@@ -62,14 +62,15 @@ Make sure RoboClaw has power and run the following in a new terminal window:
 ## Parameters
 The launch file can be configure at the command line with arguments, by changing the value in the launch file or through the rosparam server.
 
-|Parameter|Definition|
-|-----|-------|
-|dev|Dev that is the Roboclaw|
-|baud|Baud rate the Roboclaw is configured for|
-|address|The address the Roboclaw is set to, 128 is 0x80|
-|max_speed|Max speed allowed for motors in meters per second|
-|ticks_per_meter|The number of encoder ticks per meter of movement|
-|base_width|Width from one wheel edge to another in meters|
+|Parameter|Definition|Default|
+|-----|-------|------|
+|dev|Dev that is the Roboclaw|TODO|
+|baud|Baud rate the Roboclaw is configured for|TODO|
+|address|The address the Roboclaw is set to, 128 is 0x80|TODO|
+|max_speed|Max speed allowed for motors in meters per second|TODO|
+|ticks_per_meter|The number of encoder ticks per meter of movement|TODO|
+|base_width|Width from one wheel edge to another in meters|TODO|
+|topic_odom_out|Topic to use for outputting wheel odometry.|/odom|
 
 ## Topics
 ### Subscribed
