@@ -5,6 +5,11 @@ This work has been llightly tested and known to work with ROS2 Foxy and a recent
 
 ## Before you begin
 
+### Install Dependancies 
+
+sudo apt install ros-foxy-tf-transformations
+sudo pip3 install transforms3d
+
 ### Tune the RoboClaw
 Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
 installation of the free software [BasicMicro Motion Studio](https://downloads.basicmicro.com/software/BMStudio/setup.exe) (Windows only, make sure you are using the newer BasicMicro version and not the older Ion Motion Studio -- I've seen both downloadable on their website).
@@ -57,14 +62,15 @@ Make sure RoboClaw has power and run the following in a new terminal window:
 ## Parameters
 The launch file can be configure at the command line with arguments, by changing the value in the launch file or through the rosparam server.
 
-|Parameter|Definition|
-|-----|-------|
-|dev|Dev that is the Roboclaw|
-|baud|Baud rate the Roboclaw is configured for|
-|address|The address the Roboclaw is set to, 128 is 0x80|
-|max_speed|Max speed allowed for motors in meters per second|
-|ticks_per_meter|The number of encoder ticks per meter of movement|
-|base_width|Width from one wheel edge to another in meters|
+|Parameter|Definition|Default|
+|-----|-------|------|
+|dev|Dev that is the Roboclaw|/dev/ttyACM0|
+|baud|Baud rate the Roboclaw is configured for|115200|
+|address|The address the Roboclaw is set to, 128 is 0x80|128|
+|max_speed|Max speed allowed for motors in meters per second|2|
+|ticks_per_meter|The number of encoder ticks per meter of movement|4342.2|
+|base_width|Width from one wheel edge to another in meters|0.315|
+|topic_odom_out|Topic to use for outputting wheel odometry.|/odom|
 
 ## Topics
 ### Subscribed
