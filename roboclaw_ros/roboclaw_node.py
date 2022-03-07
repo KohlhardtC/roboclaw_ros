@@ -5,14 +5,19 @@ import diagnostic_msgs
 import diagnostic_updater 
 
 import rclpy
-from rclpy.node import Node
+from rclpy.node import Node 
+from rclpy.duration import Duration
 
 import tf2_ros
+from tf2_ros import TransformBroadcaster
+from tf2_ros import TransformStamped
 
 from geometry_msgs.msg import Quaternion, Twist
 from nav_msgs.msg import Odometry
 
 from .driver import roboclaw_3 as roboclaw 
+
+import tf_transformations
 
 __author__ = "chrisk+github@vidog.com (Chris Kohlhardt)"
 # This code forked from https://github.com/sonyccd/roboclaw_ros
@@ -24,17 +29,25 @@ __author__ = "chrisk+github@vidog.com (Chris Kohlhardt)"
 class EncoderOdom:
     def __init__(self, ticks_per_meter, base_width):
 
-        node = rclpy.create_node('encoder_odom') 
-
+       
+       
+        self.node = rclpy.create_node('encoder_odom') 
+        self.node.get_logger().debug("create node?")
         self.TICKS_PER_METER = ticks_per_meter
         self.BASE_WIDTH = base_width 
-        self.odom_pub = node.create_publisher(Odometry,node.declare_parameter('~topic_odom_out', '/odom' ).value , 10)
+        self.odom_pub = self.node.create_publisher(Odometry,self.node.declare_parameter('~topic_odom_out', '/odom' ).value , 10)
+        timer_period = 0.5
+                 
+
         self.cur_x = 0
         self.cur_y = 0
         self.cur_theta = 0.0
         self.last_enc_left = 0
         self.last_enc_right = 0
-        self.last_enc_time = node.get_clock().now()
+        self.last_enc_time = self.node.get_clock().now()
+
+        self.br = TransformBroadcaster(self.node)
+
 
     @staticmethod
     def normalize_angle(angle):
@@ -54,8 +67,8 @@ class EncoderOdom:
         dist_right = right_ticks / self.TICKS_PER_METER
         dist = (dist_right + dist_left) / 2.0
 
-        current_time = node.get_clock().now()
-        d_time = (current_time - self.last_enc_time).to_sec()
+        current_time = self.node.get_clock().now()
+        d_time = (current_time - self.last_enc_time)
         self.last_enc_time = current_time
 
         # TODO find better what to determine going straight, this means slight deviation is accounted
@@ -70,12 +83,13 @@ class EncoderOdom:
             self.cur_y -= r * (cos(d_theta + self.cur_theta) - cos(self.cur_theta))
             self.cur_theta = self.normalize_angle(self.cur_theta + d_theta)
 
-        if abs(d_time) < 0.000001:
+        #if abs(d_time) < 0.000001:
+        if abs( d_time.nanoseconds ) < 1000:
             vel_x = 0.0
             vel_theta = 0.0
         else:
-            vel_x = dist / d_time
-            vel_theta = d_theta / d_time
+            vel_x = dist / (d_time.nanoseconds / 1000000000 )
+            vel_theta = d_theta / ( d_time.nanoseconds / 1000000000 )
 
         return vel_x, vel_theta
 
@@ -91,15 +105,32 @@ class EncoderOdom:
             self.publish_odom(self.cur_x, self.cur_y, self.cur_theta, vel_x, vel_theta)
 
     def publish_odom(self, cur_x, cur_y, cur_theta, vx, vth):
-        quat = tf.transformations.quaternion_from_euler(0, 0, cur_theta)
-        current_time = node.get_clock().now()
+        quat = tf_transformations.quaternion_from_euler(0, 0, cur_theta)
+        current_time = self.node.get_clock().now().to_msg() 
 
-        br = tf.TransformBroadcaster()
-        br.sendTransform((cur_x, cur_y, 0),
-                         tf.transformations.quaternion_from_euler(0, 0, -cur_theta),
-                         current_time,
-                         "base_link",
-                         "odom")
+        t = TransformStamped()
+        t.header.stamp = current_time
+        t.header.frame_id = 'odom'
+        t.child_frame_id = 'base_link'        
+
+        t.transform.translation.x = cur_x
+        t.transform.translation.y = cur_y
+        t.transform.translation.z = 0.0 
+
+        q = tf_transformations.quaternion_from_euler(0, 0, -cur_theta)
+        t.transform.rotation.x = q[0]
+        t.transform.rotation.y = q[1]
+        t.transform.rotation.z = q[2]
+        t.transform.rotation.w = q[3]
+
+        self.br.sendTransform(t)
+
+     # ROS1 code
+     #   br.sendTransform((cur_x, cur_y, 0),
+     #                    tf_transformations.quaternion_from_euler(0, 0, -cur_theta),
+     #                    current_time,
+     #                    "base_link",
+     #                    "odom")
 
         odom = Odometry()
         odom.header.stamp = current_time
@@ -108,7 +139,12 @@ class EncoderOdom:
         odom.pose.pose.position.x = cur_x
         odom.pose.pose.position.y = cur_y
         odom.pose.pose.position.z = 0.0
-        odom.pose.pose.orientation = Quaternion(*quat)
+        # From ros1 code
+        #odom.pose.pose.orientation = Quaternion(*quat)
+        odom.pose.pose.orientation.x = q[0]
+        odom.pose.pose.orientation.y = q[1]
+        odom.pose.pose.orientation.z = q[2]
+        odom.pose.pose.orientation.w = q[3]
 
         odom.pose.covariance[0] = 0.01
         odom.pose.covariance[7] = 0.01
@@ -119,7 +155,7 @@ class EncoderOdom:
 
         odom.child_frame_id = 'base_link'
         odom.twist.twist.linear.x = vx
-        odom.twist.twist.linear.y = 0
+        odom.twist.twist.linear.y = 0.0
         odom.twist.twist.angular.z = vth
         odom.twist.covariance = odom.pose.covariance
 
@@ -199,7 +235,8 @@ class RoboClawNode(Node):
         self.TICKS_PER_METER = float( self.declare_parameter("~tick_per_meter", "4342.2").value )
         self.BASE_WIDTH = float( self.declare_parameter("~base_width", "0.315").value )
 
-        self.encodm = EncoderOdom(self.TICKS_PER_METER, self.BASE_WIDTH)
+        self.encodm = EncoderOdom(self.TICKS_PER_METER, self.BASE_WIDTH) 
+
         self.last_set_speed_time = self.get_clock().now()
 
         self.create_subscription( Twist, "/cmd_vel", self.cmd_vel_callback, 10 )
@@ -214,18 +251,29 @@ class RoboClawNode(Node):
         self.get_logger().debug("ticks_per_meter: " +  str(self.TICKS_PER_METER))
         self.get_logger().debug("base_width: " +  str(self.BASE_WIDTH))
 
-    def run(self):
-        rospy.loginfo("Starting motor drive")
-        r_time = rospy.Rate(10)
-        while not rospy.is_shutdown():
+        timer_period = 0.1 
+        self.timer = self.create_timer( timer_period, self.run )
 
-            if (rospy.get_rostime() - self.last_set_speed_time).to_sec() > 1:
-                rospy.loginfo("Did not get command for 1 second, stopping")
+
+    def run(self):
+
+        #self.get_logger().info("Starting motor drive")     
+        #rospy.loginfo("Starting motor drive")
+        #r_time = rospy.Rate(10)
+        #while not rospy.is_shutdown():
+
+            self.get_logger().info(" now:" + str(self.get_clock().now()) )
+            self.get_logger().info(" last:" + str(self.last_set_speed_time) )
+            difer = self.get_clock().now() - self.last_set_speed_time
+            self.get_logger().info(" last:" + str(difer) )
+            
+            if ( self.get_clock().now() - self.last_set_speed_time) > Duration(seconds=1): 
+                self.get_logger().info("Did not get command for 1 second, stopping")     
                 try:
-                    roboclaw.ForwardM1(self.address, 0)
-                    roboclaw.ForwardM2(self.address, 0)
-                except OSError as e:
-                    rospy.logerr("Could not stop")
+                    self.rc.ForwardM1(self.address, 0)
+                    self.rc.ForwardM2(self.address, 0)
+                except OSError as e: 
+                    self.get_logger().error("Could not stop")     
                     self.get_logger().debug(e)
 
             # TODO need find solution to the OSError11 looks like sync problem with serial
@@ -233,19 +281,19 @@ class RoboClawNode(Node):
             status2, enc2, crc2 = None, None, None
 
             try:
-                status1, enc1, crc1 = roboclaw.ReadEncM1(self.address)
+                status1, enc1, crc1 = self.rc.ReadEncM1(self.address)
             except ValueError:
                 pass
-            except OSError as e:
-                rospy.logwarn("ReadEncM1 OSError: %d", e.errno)
+            except OSError as e: 
+                self.get_logger().warn("ReadEncM1 OSError: %d", e.errno)
                 self.get_logger().debug(e)
 
             try:
-                status2, enc2, crc2 = roboclaw.ReadEncM2(self.address)
+                status2, enc2, crc2 = self.rc.ReadEncM2(self.address)
             except ValueError:
                 pass
-            except OSError as e:
-                rospy.logwarn("ReadEncM2 OSError: %d", e.errno)
+            except OSError as e: 
+                self.get_logger().warn("ReadEncM2 OSError: %d", e.errno)
                 self.get_logger().debug(e)
 
             if ('enc1' in vars()) and ('enc2' in vars()):
@@ -253,7 +301,8 @@ class RoboClawNode(Node):
                 self.encodm.update_publish(enc1, enc2)
 
                 self.updater.update()
-            r_time.sleep()
+            #from Ros1
+            #r_time.sleep()
 
     def cmd_vel_callback(self, twist): 
         self.last_set_speed_time = self.get_clock().now() 
@@ -274,7 +323,7 @@ class RoboClawNode(Node):
 
         try:
             # This is a hack way to keep a poorly tuned PID from making noise at speed 0
-            if vr_ticks is 0 and vl_ticks is 0:
+            if vr_ticks == 0 and vl_ticks == 0:
                 self.rc.ForwardM1(self.address, 0)
                 self.rc.ForwardM2(self.address, 0)
             else:
@@ -324,6 +373,8 @@ def main(args=None):
     rclpy.init(args=args)
     roboclaw_node = RoboClawNode()
     rclpy.spin(roboclaw_node)
+  
+   
 
     roboclaw_node.destroy_node()
     rclpy.shutdown()
