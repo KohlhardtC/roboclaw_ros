@@ -36,6 +36,8 @@ class EncoderOdom:
         self.TICKS_PER_METER = ticks_per_meter
         self.BASE_WIDTH = base_width 
         self.odom_pub = self.node.create_publisher(Odometry,self.node.declare_parameter('~topic_odom_out', '/odom' ).value , 10)
+        self.publish_odom_tf = self.node.declare_parameter('~publish_odom_tf', True ).value 
+
         timer_period = 0.5
                  
 
@@ -105,6 +107,7 @@ class EncoderOdom:
             self.publish_odom(self.cur_x, self.cur_y, self.cur_theta, vel_x, vel_theta)
 
     def publish_odom(self, cur_x, cur_y, cur_theta, vx, vth):
+        
         quat = tf_transformations.quaternion_from_euler(0, 0, cur_theta)
         current_time = self.node.get_clock().now().to_msg() 
 
@@ -123,14 +126,15 @@ class EncoderOdom:
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
 
-        self.br.sendTransform(t)
+        if self.publish_odom_tf: 
+            self.br.sendTransform(t)
 
-     # ROS1 code
-     #   br.sendTransform((cur_x, cur_y, 0),
-     #                    tf_transformations.quaternion_from_euler(0, 0, -cur_theta),
-     #                    current_time,
-     #                    "base_link",
-     #                    "odom")
+             # ROS1 code
+             #   br.sendTransform((cur_x, cur_y, 0),
+             #                    tf_transformations.quaternion_from_euler(0, 0, -cur_theta),
+             #                    current_time,
+             #                    "base_link",
+             #                    "odom")
 
         odom = Odometry()
         odom.header.stamp = current_time
@@ -139,8 +143,8 @@ class EncoderOdom:
         odom.pose.pose.position.x = cur_x
         odom.pose.pose.position.y = cur_y
         odom.pose.pose.position.z = 0.0
-        # From ros1 code
-        #odom.pose.pose.orientation = Quaternion(*quat)
+                # From ros1 code
+                #odom.pose.pose.orientation = Quaternion(*quat)
         odom.pose.pose.orientation.x = q[0]
         odom.pose.pose.orientation.y = q[1]
         odom.pose.pose.orientation.z = q[2]
@@ -160,6 +164,7 @@ class EncoderOdom:
         odom.twist.covariance = odom.pose.covariance
 
         self.odom_pub.publish(odom)
+ 
 
 
 #class Node:

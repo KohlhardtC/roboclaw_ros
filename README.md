@@ -71,6 +71,7 @@ The launch file can be configure at the command line with arguments, by changing
 |ticks_per_meter|The number of encoder ticks per meter of movement|4342.2|
 |base_width|Width from one wheel edge to another in meters|0.315|
 |topic_odom_out|Topic to use for outputting wheel odometry.|/odom|
+|publish_odom_tf|Do you want to publish an odom transform from here?|True|
 
 ## Topics
 ### Subscribed
