@@ -9,6 +9,7 @@ This work has been llightly tested and known to work with ROS2 Foxy and a recent
 
 sudo apt install ros-foxy-tf-transformations
 sudo pip3 install transforms3d
+sudo pip3 install pyserial
 
 ### Tune the RoboClaw
 Before you use this package you need to tune the controller on the Roboclaw.  This will requare the
